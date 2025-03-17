@@ -1,37 +1,30 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'robi050993/my-web-app'
-        KUBE_CONFIG = '/root/.kube/config'  // Path to kubeconfig
-    }
-
     stages {
-        stage('Clone Repository') {
+        stage('Checkout Code') {
             steps {
-                git credentialsId: 'github-creds', url: 'https://github.com/robi3484/devops.git'
+                git 'https://github.com/robi3484/devops.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
+                sh 'docker build -t robi050993/my-web-app:latest .'
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Push Image to Docker Hub') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-creds', url: '']) {
-                    sh 'docker push $DOCKER_IMAGE'
+                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
+                    sh 'docker push robi050993/my-web-app:latest'
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh '''
-                kubectl set image deployment/my-app my-app=$DOCKER_IMAGE --kubeconfig=$KUBE_CONFIG
-                '''
+                sh 'kubectl apply -f deployment.yaml'
             }
         }
     }
