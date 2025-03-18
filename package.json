@@ -1,7 +1,7 @@
 {
   "name": "my-web-app",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "server.js",
   "dependencies": {
     "express": "^4.21.2"
   }

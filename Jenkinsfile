@@ -1,29 +1,38 @@
 pipeline {
     agent any
 
+    environment {
+        // Define your Docker image name
+        DOCKER_IMAGE = 'robi050993/my-web-app:latest'
+    }
+
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/robi3484/devops.git'
+                // Check out the code from GitHub
+                git branch: 'main', credentialsId: 'github-creds', url: 'https://github.com/robi3484/devops.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t robi050993/my-web-app:latest .'
+                // Build the Docker image
+                sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
 
         stage('Push Image to Docker Hub') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
-                    sh 'docker push robi050993/my-web-app:latest'
+                // Push the Docker image to Docker Hub using credentials
+                withDockerRegistry([credentialsId: 'docker-hub-creds', url: '']) {
+                    sh 'docker push $DOCKER_IMAGE'
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
+                // Apply the Kubernetes deployment manifest
                 sh 'kubectl apply -f deployment.yaml'
             }
         }
