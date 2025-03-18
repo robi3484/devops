@@ -2,43 +2,36 @@ pipeline {
     agent any
 
     environment {
+        // Define your Docker image name
         DOCKER_IMAGE = 'robi050993/my-web-app:latest'
-        SONAR_TOKEN = credentials('SONAR_TOKEN') // Fetch SonarQube token from Jenkins credentials
     }
 
     stages {
         stage('Checkout Code') {
             steps {
+                // Check out the code from GitHub
                 git branch: 'main', credentialsId: 'github-creds', url: 'https://github.com/robi3484/devops.git'
             }
         }
 
-        stage('SAST - SonarQube Scan') {
+	stage('SAST - SonarQube Scan') {
             steps {
                 script {
-                    withSonarQubeEnv('sonar-qube') {
-                        sh '''
-                        docker run --rm \
-                        -e SONAR_HOST_URL=http://172.17.0.2:9000 \
-                        -e SONAR_LOGIN=$SONAR_TOKEN \
-                        -v $(pwd):/usr/src \
-                        sonarsource/sonar-scanner-cli \
-                        -Dsonar.projectKey=my-web-app \
-                        -Dsonar.sources=/usr/src
-                        '''
+                    withSonarQubeEnv('SonarQube') {
+                        sh 'mvn sonar:sonar'
                     }
                 }
             }
-        }
-
-        stage('Build Docker Image') {
+        }stage('Build Docker Image') {
             steps {
+                // Build the Docker image
                 sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
 
         stage('Push Image to Docker Hub') {
             steps {
+                // Push the Docker image to Docker Hub using credentials
                 withDockerRegistry([credentialsId: 'docker-hub-creds', url: '']) {
                     sh 'docker push $DOCKER_IMAGE'
                 }
@@ -47,6 +40,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
+                // Apply the Kubernetes deployment manifest
                 sh 'microk8s kubectl apply -f deployment.yaml --validate=false'
             }
         }
