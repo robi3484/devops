@@ -33,7 +33,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 // Apply the Kubernetes deployment manifest
-                sh 'kubectl apply -f deployment.yaml'
+                sh 'microk8s kubectl apply -f deployment.yaml --validate=false'
             }
         }
     }
