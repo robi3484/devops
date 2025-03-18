@@ -14,7 +14,15 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+	stage('SAST - SonarQube Scan') {
+            steps {
+                script {
+                    withSonarQubeEnv('SonarQube') {
+                        sh 'mvn sonar:sonar'
+                    }
+                }
+            }
+        }stage('Build Docker Image') {
             steps {
                 // Build the Docker image
                 sh 'docker build -t $DOCKER_IMAGE .'
