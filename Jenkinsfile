@@ -18,11 +18,11 @@ pipeline {
         stage('SAST - SonarQube Scan') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarQube') {
+                    withSonarQubeEnv('sonar-qube') {
                         sh '''
                         mvn sonar:sonar \
                         -Dsonar.projectKey=my-web-app \
-                        -Dsonar.host.url=http://your-sonarqube-server-url \
+                        -Dsonar.host.url=http://localhost:9000 \
                         -Dsonar.login=$SONAR_TOKEN
                         '''
                     }
